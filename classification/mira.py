@@ -54,15 +54,44 @@ class MiraClassifier:
         """
         This method sets self.weights using MIRA.  Train the classifier for each value of C in Cgrid,
         then store the weights that give the best accuracy on the validationData.
-
+        
         Use the provided self.weights[label] data structure so that
         the classify method works correctly. Also, recall that a
         datum is a counter from features to values for those features
         representing a vector of values.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
 
+        labelWeight = util.Counter()
+        counterWeights = util.Counter()
+        a = 0   
+        count = util.Counter()
+        for c in Cgrid:
+            for iteration in range(self.max_iterations):
+                print("Starting iteration ", iteration, "...")
+                for i in range(len(trainingData)):
+                    for l in self.legalLabels:
+                        labelWeight[l] = trainingData[i] * self.weights[l]
+                    if (trainingLabels[i] != labelWeight.argMax()):
+                        x = trainingLabels[i]
+                        y = trainingData[i]
+                        z = labelWeight.argMax()
+                        tou = ((self.weights[z] - self.weights[x]) * y + 1.0)/2.0/(y * y) 
+                        d = min(tou,c)
+                        j = util.Counter()  
+                        for k in trainingData[i].keys():
+                            j[k] = trainingData[i][k]*d
+                        self.weights[trainingLabels[i]] += j
+                        self.weights[labelWeight.argMax()] - j
+            counterWeights[c] = self.weights
+            for i in range(len(validationData)):
+                for l in validationLabels:
+                    labelWeight[l] = validationData[i] * self.weights[l]
+                if (validationLabels[i] == labelWeight.argMax()):
+                    a += 1  
+            count[c] = a
+        self.weights = counterWeights[count.argMax()]
+        
     def classify(self, data ):
         """
         Classifies each datum as the label that most closely matches the prototype vector
@@ -77,5 +106,4 @@ class MiraClassifier:
                 vectors[l] = self.weights[l] * datum
             guesses.append(vectors.argMax())
         return guesses
-
 
